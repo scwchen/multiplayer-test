@@ -2,6 +2,7 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { ref, update, onValue } from 'firebase/database';
 import realtime from './firebase.js';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 function App() {
 
@@ -34,6 +35,12 @@ function App() {
     // setPlayersReady()
   };
 
+  const resetPlayers = () => {
+    const specificNodeRef = ref(realtime, "players");
+    update(specificNodeRef, { playerOneReady: false, playerTwoReady: false });
+  };
+
+
   useEffect(() => {
     const dbRef = ref(realtime, 'players');
     // We grab a snapshot of our database and use the .val method to parse the JSON object that is our database data out of it
@@ -48,34 +55,56 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <div className="playerControls">
-        <div className="playerOne">
+    <Router>
+      <div className="App">
+        <Route exact path="/">
 
-          <p>
-            {playersReady.playerOneReady ? "Player 1 Ready" : "Awaiting Player 1"}
-          </p>
-          <button className="playerOneButton" onClick={() => handleClick(0)}>
-            {playersReady.playerOneReady ? "Ready" : "Player 1"}
-          </button>
-        </div>
-        <div className="playerTwo">
-          <p>
-            {playersReady.playerTwoReady ? "Player 2 Ready" : "Awaiting Player 2"}
-          </p>
-          <button className="playerTwoButton" onClick={() => handleClick(1)}>
-            {playersReady.playerTwoReady ? "Ready" : "Player 2"}
-          </button>
-        </div>
+          <div className="playerControls">
 
-        {
-          playersReady.playerOneReady && playersReady.playerTwoReady ? 
-          <p>Both players ready</p> : null
-        }
+            <div className="playerOne">
+              <p>
+                {playersReady.playerOneReady ? "Player 1 Ready" : "Awaiting Player 1"}
+              </p>
+              <Link to="/player1">
+                <button className="playerOneButton" onClick={() => handleClick(0)}>
+                  {playersReady.playerOneReady ? "Ready" : "Player 1"}
+                </button>
+
+              </Link>
+
+            </div>
+          </div>
 
 
+          <div className="playerTwo">
+            <p>
+              {playersReady.playerTwoReady ? "Player 2 Ready" : "Awaiting Player 2"}
+            </p>
+            <Link to="/player2">
+              <button className="playerTwoButton" onClick={() => handleClick(1)}>
+                {playersReady.playerTwoReady ? "Ready" : "Player 2"}
+              </button>
+            </Link>
+          </div>
+
+          {
+            playersReady.playerOneReady && playersReady.playerTwoReady ?
+              <p>Both players ready</p> : null
+          }
+          <button onClick={resetPlayers}>Reset Players</button>
+
+        </Route>
+        <Route path="/player1">
+          <p>Player 1 Ready - Awaiting Player 2</p>
+        </Route>
+
+        <Route path="/player2">
+          <p>Player 2 Ready - Awaiting Player 1</p>
+        </Route>
       </div>
-    </div>
+
+
+    </Router >
   );
 }
 
